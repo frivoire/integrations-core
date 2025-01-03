@@ -157,11 +157,6 @@ class MySql(AgentCheck):
         self.set_metadata('resolved_hostname', self.resolved_hostname)
 
     @property
-    def reported_hostname(self):
-        # type: () -> str
-        return self.resolved_hostname
-
-    @property
     def resolved_hostname(self):
         # type: () -> str
         if self._resolved_hostname is None:
@@ -174,7 +169,7 @@ class MySql(AgentCheck):
     @property
     def database_identifier(self):
         # type: () -> str
-        config_identifier = self._config.get('database_identifier', {}).get('identifier')
+        config_identifier = self._config.database_identifier.get('identifier')
         if config_identifier:
             return config_identifier
         include_port = self._config.get('database_identifier', {}).get('include_port', False)
@@ -195,8 +190,11 @@ class MySql(AgentCheck):
         return self._database_hostname
 
     def add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event but which require check calculations outside the config.
+        """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
-        self.tags.append("database_identifier:{}".format(self.database_identifier))
+        self.tags.append("database_instance:{}".format(self.database_identifier))
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -226,7 +224,7 @@ class MySql(AgentCheck):
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self.database_identifier,
             )
         )
 
@@ -1332,7 +1330,6 @@ class MySql(AgentCheck):
                 "host": self.resolved_hostname,
                 "port": self._config.port,
                 "database_hostname": self.database_hostname,
-                "database_identifier": self.database_identifier,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "mysql",
                 "kind": "database_instance",

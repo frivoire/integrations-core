@@ -170,8 +170,11 @@ class PostgreSql(AgentCheck):
         return discovery
 
     def add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event but which require check calculations outside the config.
+        """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
-        self.tags.append("database_identifier:{}".format(self.database_identifier))
+        self.tags.append("database_instance:{}".format(self.database_identifier))
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -198,10 +201,11 @@ class PostgreSql(AgentCheck):
                 self.tags.append(
                     "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
                 )
-        # finally, emit a `database_instance` resource for this instance
+        # finally, tag the `database_instance` resource for this instance
+        # metrics intake will use this tag to add all the tags for the instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self.database_identifier,
             )
         )
 
@@ -457,11 +461,6 @@ class PostgreSql(AgentCheck):
         return self.is_aurora
 
     @property
-    def reported_hostname(self):
-        # type: () -> str
-        return self.resolved_hostname
-
-    @property
     def resolved_hostname(self):
         # type: () -> str
         if self._resolved_hostname is None:
@@ -474,11 +473,11 @@ class PostgreSql(AgentCheck):
     @property
     def database_identifier(self):
         # type: () -> str
-        config_identifier = self._config.get('database_identifier', {}).get('identifier')
+        config_identifier = self._config.database_identifier.get('identifier')
         if config_identifier:
             return config_identifier
-        include_port = self._config.get('database_identifier', {}).get('include_port', False)
-        return "{}{}".format(self.resolved_hostname, "." + self._config.port if include_port else "")
+        include_port = self._config.database_identifier.get('include_port', False)
+        return "{}{}".format(self.resolved_hostname, ":" + self._config.port if include_port else "")
 
     def set_resolved_hostname_metadata(self):
         """
@@ -940,7 +939,6 @@ class PostgreSql(AgentCheck):
                 "host": self.resolved_hostname,
                 "port": self._config.port,
                 "database_hostname": self.database_hostname,
-                "database_identifier": self.database_identifier,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
                 "kind": "database_instance",

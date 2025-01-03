@@ -18,9 +18,8 @@ files:
     - name: host
       required: true
       description: |
-        The hostname to connect to.
-        NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
-        provide a value for the sock key.
+        The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
+        e.g. `/var/run/postgresql/.s.PGSQL.5432`.
       value:
         example: "localhost"
         type: string
@@ -60,7 +59,7 @@ files:
           value: boolean
           description: |
             Set to `true` to include the port in the database identifier. For example, for a server with host
-            `postgres.mycompany.com` and port `5432` will be identified as `postgres.mycompany.com.5432`.
+            `postgres.mycompany.com` and port `5432` will be identified as `postgres.mycompany.com:5432`.
             
             Use this option if runnining multiple instances on one host.
           default: false
