@@ -43,6 +43,11 @@
       "process_signatures": [
         "milvus"
       ]
+    },
+    "monitors": {
+      "DML channel lag": "assets/monitors/dml_channel_lag.json",
+      "Request latency": "assets/monitors/request_latency.json",
+      "Index build latency": "assets/monitors/index_build_latency.json"
     }
   },
   "author": {
