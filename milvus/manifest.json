@@ -16,6 +16,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::AI/ML",
+      "Category::Log Collection",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
@@ -42,9 +43,12 @@
       },
       "process_signatures": [
         "milvus"
-      ]
-    }
-  },
+      	]
+      }
+    },
+  "logs": {
+      "source": "milvus"
+    },
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
